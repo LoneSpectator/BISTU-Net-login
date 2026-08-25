@@ -1,0 +1,10 @@
+# Runtime data and credentials
+data/*
+!data/.gitkeep
+
+# Local environment / editor files
+.env
+*.local
+.DS_Store
+.idea/
+.vscode/

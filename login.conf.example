@@ -1,0 +1,16 @@
+# Required
+USERNAME=your_username
+PASSWORD=your_password
+
+# Optional. The defaults below may be omitted.
+# AUTH_SERVER_IP=10.144.49.2
+# AUTH_SERVER_PORT=802
+# LOOP_INTERVAL_SECONDS=60
+# PING_IP=223.6.6.6
+# LOG_RETENTION_DAYS=7
+# DEBUG=false
+
+# Optional manual overrides.
+# Leave them unset/empty to auto-detect from the route to AUTH_SERVER_IP.
+# CLIENT_IP=10.153.123.123
+# CLIENT_MAC=9f:c5:a6:0c:61:9b
