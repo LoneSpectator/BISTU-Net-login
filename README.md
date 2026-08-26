@@ -96,7 +96,7 @@ docker logs -f bistu-login
 项目已发布到 GitHub Container Registry（GHCR）：
 
 ```text
-ghcr.io/LoneSpectator/BISTU-Net-login:latest
+ghcr.io/lonespectator/bistu-net-login:latest
 ```
 
 直接运行：
@@ -112,13 +112,13 @@ docker run -d \
     --cap-add NET_RAW \
     --security-opt no-new-privileges:true \
     -v "$(pwd)/data:/data" \
-    ghcr.io/LoneSpectator/BISTU-Net-login:latest
+    ghcr.io/lonespectator/bistu-net-login:latest
 ```
 
 也可以继续使用本项目的 `docker-compose.yml`，通过环境变量指定预构建镜像：
 
 ```sh
-BISTU_LOGIN_IMAGE=ghcr.io/LoneSpectator/BISTU-Net-login:latest \
+BISTU_LOGIN_IMAGE=ghcr.io/lonespectator/bistu-net-login:latest \
     docker compose up -d --no-build
 ```
 
@@ -132,8 +132,8 @@ BISTU_LOGIN_IMAGE=ghcr.io/LoneSpectator/BISTU-Net-login:latest \
 | --- | --- | --- |
 | `USERNAME` | 无 | 校园网用户名，必填 |
 | `PASSWORD` | 无 | 校园网密码，必填 |
-| `AUTH_SERVER_IP` | `10.144.49.2` | 校园网认证服务器 IP ，默认为无线网，有线网修改为10.144.0.3|
-| `AUTH_SERVER_PORT` | `802` | 【非必要勿修改】服务器认证端口 |
+| `AUTH_SERVER_IP` | `10.144.49.2` | 校园网认证服务器 IP ，默认为无线网，有线网修改为10.144.0.3 |
+| `AUTH_SERVER_PORT` | `802` | 服务器认证端口，非必要勿修改 |
 | `LOOP_INTERVAL_SECONDS` | `60` | 两次联网状态检测之间的间隔秒数 |
 | `PING_IP` | `223.6.6.6` | 用于判断互联网是否已经连通的目标 IP |
 | `LOG_RETENTION_DAYS` | `7` | 日志保留天数 |
