@@ -10,6 +10,7 @@ DATA_DIR="${DATA_DIR:-/data}"
 CONFIG_FILE="$DATA_DIR/login.conf"
 LOG_DIR="$DATA_DIR/log"
 LAST_RESPONSE_FILE="$DATA_DIR/last_response.txt"
+LAST_WGET_STDERR_FILE="$DATA_DIR/last_wget_stderr.txt"
 
 # Defaults. Any of these can be overridden by /data/login.conf.
 USERNAME=""
@@ -28,6 +29,8 @@ RUNNING=1
 SLEEP_PID=""
 LAST_STATE="unknown"
 LAST_CLEANUP_DATE=""
+PING_CHECK_ATTEMPTS=3
+PING_ATTEMPTS_USED=0
 
 log_message() {
     level="$1"
@@ -235,7 +238,20 @@ build_login_url() {
 }
 
 check_online() {
-    ping -c 1 -W 2 "$PING_IP" >/dev/null 2>&1
+    ping_attempt=1
+    PING_ATTEMPTS_USED=0
+
+    while [ "$ping_attempt" -le "$PING_CHECK_ATTEMPTS" ]; do
+        PING_ATTEMPTS_USED="$ping_attempt"
+
+        if ping -c 1 -W 2 "$PING_IP" >/dev/null 2>&1; then
+            return 0
+        fi
+
+        ping_attempt=$((ping_attempt + 1))
+    done
+
+    return 1
 }
 
 cleanup_old_logs() {
@@ -269,14 +285,25 @@ attempt_login() {
     wget_status=$?
 
     if [ "$DEBUG_ENABLED" -eq 1 ]; then
-        # The raw body from the most recent request is retained only in debug mode.
+        # Retain the raw response body and wget stderr from the most recent authentication request for troubleshooting.
+
         if [ -f "$response_tmp" ]; then
             cp "$response_tmp" "$LAST_RESPONSE_FILE"
         else
             : > "$LAST_RESPONSE_FILE"
         fi
+
+        if [ -f "$wget_log_tmp" ]; then
+            cp "$wget_log_tmp" "$LAST_WGET_STDERR_FILE"
+        else
+            : > "$LAST_WGET_STDERR_FILE"
+        fi
+
         response_bytes="$(wc -c < "$LAST_RESPONSE_FILE" | tr -d ' ')"
+        wget_stderr_bytes="$(wc -c < "$LAST_WGET_STDERR_FILE" | tr -d ' ')"
+
         debug_message "Portal response saved: file=$LAST_RESPONSE_FILE, bytes=${response_bytes:-0}, wget_exit=$wget_status"
+        debug_message "wget stderr saved: file=$LAST_WGET_STDERR_FILE, bytes=${wget_stderr_bytes:-0}"
     fi
 
     rm -f "$response_tmp" "$wget_log_tmp"
@@ -316,7 +343,7 @@ validate_config
 
 if [ "$DEBUG_ENABLED" -eq 0 ]; then
     # Avoid leaving stale response data after debug mode has been disabled.
-    rm -f "$LAST_RESPONSE_FILE"
+    rm -f "$LAST_RESPONSE_FILE" "$LAST_WGET_STDERR_FILE"
 fi
 
 log_message "INFO" "BISTU login service started."
@@ -326,13 +353,13 @@ while [ "$RUNNING" -eq 1 ]; do
     cleanup_old_logs
 
     if check_online; then
-        debug_message "Connectivity check succeeded: ping_ip=$PING_IP"
+        debug_message "Connectivity check succeeded: ping_ip=$PING_IP, attempts=$PING_ATTEMPTS_USED/$PING_CHECK_ATTEMPTS"
         if [ "$LAST_STATE" != "online" ]; then
             log_message "INFO" "Internet connection is available."
         fi
         LAST_STATE="online"
     else
-        debug_message "Connectivity check failed: ping_ip=$PING_IP"
+        debug_message "Connectivity check failed: ping_ip=$PING_IP, attempts=$PING_ATTEMPTS_USED/$PING_CHECK_ATTEMPTS"
         if [ "$LAST_STATE" != "offline" ]; then
             log_message "WARN" "Internet connection is unavailable; starting portal login."
         fi

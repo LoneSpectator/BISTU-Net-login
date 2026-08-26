@@ -14,7 +14,7 @@
 - **外部配置文件**：统一从 `/data/login.conf` 读取配置。
 - **双路日志**：日志同时输出到容器标准输出和 `/data/log/YYYY-MM-DD.log`。
 - **自动日志清理**：默认保留最近 7 天的日志，可配置。
-- **调试模式**：开启后记录更详细的检测和认证信息，并保存最后一次认证返回内容。
+- **调试模式**：开启后记录更详细的检测和认证信息，并保存最后一次认证返回内容及 `wget` stderr。
 - **减少闪存写入**：普通模式仅在网络状态变化、执行认证或出现异常时记录关键日志。
 - **最小权限运行**：根文件系统只读，仅保留 `ping` 所需的 `NET_RAW` capability。
 
@@ -126,11 +126,13 @@ BISTU_LOGIN_IMAGE=ghcr.io/LoneSpectator/BISTU-Net-login:latest \
 
 只有 `USERNAME` 和 `PASSWORD` 是必填项，其余配置都有默认值。
 
+**认证服务器IP默认为无线网配置，有线网需修改AUTH_SERVER_IP=10.144.0.3！**
+
 | 配置项 | 默认值 | 说明 |
 | --- | --- | --- |
 | `USERNAME` | 无 | 校园网用户名，必填 |
 | `PASSWORD` | 无 | 校园网密码，必填 |
-| `AUTH_SERVER_IP` | `10.144.49.2` | 【非必要勿修改】校园网认证服务器 IP |
+| `AUTH_SERVER_IP` | `10.144.49.2` | 校园网认证服务器 IP ，默认为无线网，有线网修改为10.144.0.3|
 | `AUTH_SERVER_PORT` | `802` | 【非必要勿修改】服务器认证端口 |
 | `LOOP_INTERVAL_SECONDS` | `60` | 两次联网状态检测之间的间隔秒数 |
 | `PING_IP` | `223.6.6.6` | 用于判断互联网是否已经连通的目标 IP |
@@ -235,13 +237,14 @@ DEBUG=true
 
 密码不会写入日志。
 
-最后一次认证请求的原始返回内容会保存到：
+最后一次认证请求的原始返回内容及 `wget` stderr会保存到：
 
 ```text
 /data/last_response.txt
+/data/last_wget_stderr.txt
 ```
 
-关闭 Debug 并重新启动容器后，旧的 `last_response.txt` 会自动删除。
+关闭 Debug 并重新启动容器后，上述文件会自动删除。
 
 ## 安全设计
 
