@@ -132,7 +132,7 @@ BISTU_LOGIN_IMAGE=ghcr.io/lonespectator/bistu-net-login:latest \
 | --- | --- | --- |
 | `USERNAME` | 无 | 校园网用户名，必填 |
 | `PASSWORD` | 无 | 校园网密码，必填 |
-| `AUTH_SERVER_IP` | `10.144.49.2` | 校园网认证服务器 IP ，默认为无线网，有线网修改为10.144.0.3 |
+| `AUTH_SERVER_IP` | `10.144.49.2` | 校园网认证服务器 IP ，默认为新校区无线网，新校区有线网修改为10.144.0.3。老校区有线：192.168.211.3；老校区无线：10.1.206.13。 |
 | `AUTH_SERVER_PORT` | `802` | 服务器认证端口，非必要勿修改 |
 | `LOOP_INTERVAL_SECONDS` | `60` | 两次联网状态检测之间的间隔秒数 |
 | `PING_IP` | `223.6.6.6` | 用于判断互联网是否已经连通的目标 IP |
